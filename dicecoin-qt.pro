@@ -21,6 +21,16 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 #    BOOST_INCLUDE_PATH, BOOST_LIB_PATH, BDB_INCLUDE_PATH,
 #    BDB_LIB_PATH, OPENSSL_INCLUDE_PATH and OPENSSL_LIB_PATH respectively
 
+BOOST_INCLUDE_PATH = "C:\boost_1_55_0-mgw"
+BOOST_LIB_PATH = "C:\boost_1_55_0-mgw\stage\lib"
+BDB_INCLUDE_PATH = "C:\db-4.8.30.NC-mgw\build_unix"
+BDB_LIB_PATH = "C:\db-4.8.30.NC-mgw\build_unix"
+OPENSSL_INCLUDE_PATH = "C:\openssl-1.0.1b-mgw\include"
+OPENSSL_LIB_PATH = "C:\openssl-1.0.1b-mgw"
+MINIUPNPC_INCLUDE_PATH = "C:\miniupnpc-1.6-mgw"
+MINIUPNPC_LIB_PATH = "C:\miniupnpc-1.6-mgw"
+BOOST_LIB_SUFFIX = "-mgw49-mt-s-1_55"
+
 OBJECTS_DIR = build
 MOC_DIR = build
 UI_DIR = build
@@ -90,17 +100,7 @@ contains(BITCOIN_NEED_QT_PLUGINS, 1) {
 INCLUDEPATH += src/leveldb/include src/leveldb/helpers
 LIBS += $$PWD/src/leveldb/libleveldb.a $$PWD/src/leveldb/libmemenv.a
 
-!win32 {
-    # we use QMAKE_CXXFLAGS_RELEASE even without RELEASE=1 because we use RELEASE to indicate linking preferences not -O preferences
-    genleveldb.commands = cd $$PWD/src/leveldb && CC=$$QMAKE_CC CXX=$$QMAKE_CXX $(MAKE) OPT=\"$$QMAKE_CXXFLAGS $$QMAKE_CXXFLAGS_RELEASE\" libleveldb.a libmemenv.a
-} else {
-    # make an educated guess about what the ranlib command is called
-    isEmpty(QMAKE_RANLIB) {
-        QMAKE_RANLIB = $$replace(QMAKE_STRIP, strip, ranlib)
-    }
-    LIBS += -lshlwapi
-    genleveldb.commands = cd $$PWD/src/leveldb && CC=$$QMAKE_CC CXX=$$QMAKE_CXX TARGET_OS=OS_WINDOWS_CROSSCOMPILE $(MAKE) OPT=\"$$QMAKE_CXXFLAGS $$QMAKE_CXXFLAGS_RELEASE\" libleveldb.a libmemenv.a && $$QMAKE_RANLIB $$PWD/src/leveldb/libleveldb.a && $$QMAKE_RANLIB $$PWD/src/leveldb/libmemenv.a
-}
+
 genleveldb.target = $$PWD/src/leveldb/libleveldb.a
 genleveldb.depends = FORCE
 PRE_TARGETDEPS += $$PWD/src/leveldb/libleveldb.a
