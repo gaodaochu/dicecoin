@@ -1,0 +1,1 @@
+lrelease bitcoin_zh_CN.ts ¨Cqm bitcoin_zh_CN.qm
