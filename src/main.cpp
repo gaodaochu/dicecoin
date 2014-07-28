@@ -41,10 +41,11 @@ CBigNum bnProofOfWorkLimitTestNet(~uint256(0) >> 16);
 
 unsigned int nTargetSpacing = 1 * 60; // 1 minute
 unsigned int nStakeMinAge = 8 * 60 * 60; // 8 hours
+unsigned int nStakeMinAgeFuture = 30 * 60; // 30 minute
 unsigned int nStakeMaxAge = -1; // unlimited
 unsigned int nModifierInterval = 10 * 60; // time to elapse before new modifier is computed
 
-int nCoinbaseMaturity = 100;
+int nCoinbaseMaturity = 10;
 CBlockIndex* pindexGenesisBlock = NULL;
 int nBestHeight = -1;
 
@@ -990,10 +991,42 @@ int64_t GetProofOfWorkReward(int64_t nFees)
       return nSubsidy + nFees;
 }
 
+unsigned int GetStakeMinAge()
+{
+	// old process
+	if (pindexBest->nHeight < 25000)
+	{
+		return nStakeMinAge;
+	}
+	else
+	{
+		return nStakeMinAgeFuture;
+	}
+}
+
+uint64_t  GetNewYearReward()
+{
+	// old process
+	if (pindexBest->nHeight < 25000)
+	{
+		return COIN_YEAR_REWARD;
+	}
+	// boom time
+	else if (pindexBest->nHeight < 31000)
+	{
+		return COIN_YEAR_REWARD_BOOM;
+	}
+	// future time
+	else 
+	{
+		return COIN_YEAR_REWARD_FUTURE;
+	}
+}
+
 // miner's coin stake reward based on coin age spent (coin-days)
 int64_t GetProofOfStakeReward(int64_t nCoinAge, int64_t nFees)
 {
-    int64_t nSubsidy = nCoinAge * COIN_YEAR_REWARD * 33 / (365 * 33 + 8);
+    int64_t nSubsidy = nCoinAge * GetNewYearReward() * 33 / (365 * 33 + 8);
 
     if (fDebug && GetBoolArg("-printcreation"))
         printf("GetProofOfStakeReward(): create=%s nCoinAge=%"PRId64"\n", FormatMoney(nSubsidy).c_str(), nCoinAge);
@@ -1881,7 +1914,7 @@ bool CTransaction::GetCoinAge(CTxDB& txdb, uint64_t& nCoinAge) const
         CBlock block;
         if (!block.ReadFromDisk(txindex.pos.nFile, txindex.pos.nBlockPos, false))
             return false; // unable to read block of previous transaction
-        if (block.GetBlockTime() + nStakeMinAge > nTime)
+        if (block.GetBlockTime() + GetStakeMinAge() > nTime)
             continue; // only count coins meeting min age requirement
 
         int64_t nValueIn = txPrev.vout[txin.prevout.n].nValue;
@@ -3208,7 +3241,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
                 printf("  getblocks stopping at %d %s\n", pindex->nHeight, pindex->GetBlockHash().ToString().substr(0,20).c_str());
                 // ppcoin: tell downloading node about the latest block if it's
                 // without risk being rejected due to stake connection check
-                if (hashStop != hashBestChain && pindex->GetBlockTime() + nStakeMinAge > pindexBest->GetBlockTime())
+                if (hashStop != hashBestChain && pindex->GetBlockTime() + GetStakeMinAge() > pindexBest->GetBlockTime())
                     pfrom->PushInventory(CInv(MSG_BLOCK, hashBestChain));
                 break;
             }

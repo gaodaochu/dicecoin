@@ -1602,7 +1602,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         }
 
         static int nMaxStakeSearchInterval = 60;
-        if (block.GetBlockTime() + nStakeMinAge > txNew.nTime - nMaxStakeSearchInterval)
+        if (block.GetBlockTime() + GetStakeMinAge() > txNew.nTime - nMaxStakeSearchInterval)
             continue; // only count coins meeting min age requirement
 
         bool fKernelFound = false;
@@ -1710,7 +1710,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
             if (pcoin.first->vout[pcoin.second].nValue >= nStakeCombineThreshold)
                 continue;
             // Do not add input that is still too young
-            if (nTimeWeight < nStakeMinAge)
+            if (nTimeWeight < GetStakeMinAge())
                 continue;
 
             txNew.vin.push_back(CTxIn(pcoin.first->GetHash(), pcoin.second));
