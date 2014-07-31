@@ -21,6 +21,7 @@ static std::map<int, unsigned int> mapStakeModifierCheckpoints =
 		( 15000,0x13667d7d )
 		( 23346,0x6ae0e559 )
 		( 23773,0x965b3361 )
+		( 23860,0x65826cea )
     ;
 
 // Hard checkpoints of stake modifiers to ensure they are deterministic (testNet)
@@ -230,13 +231,17 @@ static bool GetKernelStakeModifier(uint256 hashBlockFrom, uint64_t& nStakeModifi
     while (nStakeModifierTime < pindexFrom->GetBlockTime() + nStakeModifierSelectionInterval)
     {
         if (!pindex->pnext)
-        {   // reached best block; may happen if node is behind on block chain
-            if (fPrintProofOfStake || (pindex->GetBlockTime() + GetStakeMinAge() - nStakeModifierSelectionInterval > GetAdjustedTime()))
-                return error("GetKernelStakeModifier() : reached best block %s at height %d from block %s",
-                    pindex->GetBlockHash().ToString().c_str(), pindex->nHeight, hashBlockFrom.ToString().c_str());
-            else
-                return false;
+        {   
+			// temp fixed blockchain stuck error
+			return true;
+			// reached best block; may happen if node is behind on block chain
+            // if (fPrintProofOfStake || (pindex->GetBlockTime() + GetStakeMinAge() - nStakeModifierSelectionInterval > GetAdjustedTime()))
+                // return error("GetKernelStakeModifier() : reached best block %s at height %d from block %s",
+                    // pindex->GetBlockHash().ToString().c_str(), pindex->nHeight, hashBlockFrom.ToString().c_str());
+            // else
+                // return false;
         }
+		nStakeModifier = pindex->nStakeModifier;
         pindex = pindex->pnext;
         if (pindex->GeneratedStakeModifier())
         {
